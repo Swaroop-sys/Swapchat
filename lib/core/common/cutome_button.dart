@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class CustomButton extends StatelessWidget {
+class CustomButton extends StatefulWidget {
   final Function()? onPressed;
   final String? text;
   final Widget? child;
@@ -16,11 +16,31 @@ class CustomButton extends StatelessWidget {
        );
 
   @override
+  State<CustomButton> createState() => _CustomButtonState();
+}
+
+class _CustomButtonState extends State<CustomButton> {
+  bool _isLoading = false;
+
+  void _handlePress() async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+
+    await Future.delayed(const Duration(seconds: 2)); // Simulate loading
+
+    setState(() => _isLoading = false);
+
+    if (widget.onPressed != null) {
+      widget.onPressed!();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: _handlePress,
         style: ElevatedButton.styleFrom(
           backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Colors.black87,
@@ -29,16 +49,24 @@ class CustomButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child:
-            child ??
-            Text(
-              text!,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+        child: _isLoading
+            ? const SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 3,
+                ),
+              )
+            : widget.child ??
+                  Text(
+                    widget.text!,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
       ),
     );
   }

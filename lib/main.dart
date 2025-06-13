@@ -1,8 +1,14 @@
 import 'package:chatapp/config/theme/app_theme.dart';
+import 'package:chatapp/data/services/service_locator.dart';
 import 'package:chatapp/presentation/screens/auth/loginscreen.dart';
+import 'package:chatapp/router/app_routers.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
+  setupServiceLocator();
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -15,7 +21,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-
+      navigatorKey: getIt<AppRouter>().navigatorKey,
       theme: AppTheme.lightTheme,
       home: Loginscreen(),
     );

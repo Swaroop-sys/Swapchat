@@ -1,5 +1,7 @@
 import 'package:chatapp/core/common/custome_text_field.dart';
+import 'package:chatapp/data/services/service_locator.dart';
 import 'package:chatapp/presentation/screens/auth/signup_screen.dart';
+import 'package:chatapp/router/app_routers.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/common/cutome_button.dart';
@@ -12,13 +14,42 @@ class Loginscreen extends StatefulWidget {
 }
 
 class _LoginscreenState extends State<Loginscreen> {
+  final _formkey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final _emailfocus = FocusNode();
+  final _passwordfocus = FocusNode();
+  bool _ispasswordvisible = false;
   @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
+    _emailfocus.dispose();
+    _passwordfocus.dispose();
     super.dispose();
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return "Please enter your email";
+    }
+
+    // Email regex pattern
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
+    if (!emailRegex.hasMatch(value)) {
+      return "Please enter a valid email address";
+    }
+
+    return null; // Valid email
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return "Please Enter Your Password";
+    } else if (value.length < 8) {
+      return "Password Must Be 8 Characters Long";
+    }
   }
 
   @override
@@ -26,6 +57,7 @@ class _LoginscreenState extends State<Loginscreen> {
     return Scaffold(
       body: SafeArea(
         child: Form(
+          key: _formkey,
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
@@ -50,6 +82,8 @@ class _LoginscreenState extends State<Loginscreen> {
                 SizedBox(height: 30),
                 CustomeTextField(
                   controller: emailController,
+                  focusNode: _emailfocus,
+                  validator: _validateEmail,
                   hintText: "Email",
                   prefixIcon: Icon(Icons.mail),
                 ),
@@ -57,12 +91,33 @@ class _LoginscreenState extends State<Loginscreen> {
                 CustomeTextField(
                   controller: passwordController,
                   hintText: "Password",
-                  obsecureText: true,
+                  focusNode: _passwordfocus,
+
+                  validator: _validatePassword,
+                  obsecureText: !_ispasswordvisible,
                   prefixIcon: Icon(Icons.lock),
-                  suffixIcon: Icon(Icons.visibility),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _ispasswordvisible = !_ispasswordvisible;
+                      });
+                    },
+                    icon: Icon(
+                      _ispasswordvisible
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                    ),
+                  ),
                 ),
                 SizedBox(height: 30),
-                CustomButton(onPressed: () {}, text: 'Login'),
+                CustomButton(
+                  onPressed: () {
+                    FocusScope.of(context).unfocus();
+                    if (_formkey.currentState?.validate() ?? false) {}
+                    ;
+                  },
+                  text: 'Login',
+                ),
                 SizedBox(height: 30),
 
                 Row(
@@ -86,12 +141,7 @@ class _LoginscreenState extends State<Loginscreen> {
                         ),
                       ),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SignupScreen(),
-                          ),
-                        );
+                        getIt<AppRouter>().push(SignupScreen());
                       },
                     ),
                   ],
