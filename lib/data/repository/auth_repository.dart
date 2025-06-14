@@ -2,8 +2,10 @@ import 'dart:developer';
 
 import 'package:chatapp/data/models/user_model.dart';
 import 'package:chatapp/data/services/base_repository.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthRepository extends BaseRepositories {
+  Stream<User?> get authStateChanges => auth.authStateChanges();
   Future<UserModel> signUp({
     required String fullname,
     required String username,
@@ -78,5 +80,9 @@ class AuthRepository extends BaseRepositories {
     } catch (e) {
       throw "Failed To Save User Data";
     }
+  }
+
+  Future<void> signOut() async {
+    auth.signOut();
   }
 }
